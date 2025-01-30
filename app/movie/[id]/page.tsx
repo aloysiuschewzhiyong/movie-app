@@ -7,13 +7,14 @@ import { getLanguageName } from "@/utils/helpers";
 import { Star } from "lucide-react";
 import { BackdropImage } from "@/components/backdrop-image";
 
-export default async function MoviePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+interface MoviePageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default async function MoviePage({ params }: MoviePageProps) {
   try {
-    // First await the entire params object
     const resolvedParams = await Promise.resolve(params);
     const movieId = resolvedParams.id;
 

@@ -4,15 +4,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-export default async function SeasonPage({
-  params,
-}: {
-  params: { id: string; seasonNumber: string };
-}) {
+interface SeasonPageProps {
+  params: {
+    id: string;
+    seasonNumber: string;
+  };
+}
+
+export default async function SeasonPage({ params }: SeasonPageProps) {
   try {
+    const resolvedParams = await Promise.resolve(params);
+    const { id, seasonNumber } = resolvedParams;
+
     const [tvShow, season] = await Promise.all([
-      getTVShowDetails(params.id),
-      getSeasonDetails(params.id, Number.parseInt(params.seasonNumber)),
+      getTVShowDetails(id),
+      getSeasonDetails(id, Number.parseInt(seasonNumber)),
     ]);
 
     return (
@@ -40,7 +46,7 @@ export default async function SeasonPage({
             </div>
             <h2 className="text-2xl font-bold mb-4">Episodes</h2>
             <ul className="space-y-4">
-              {season.episodes.map((episode: any) => (
+              {season.episodes.map((episode) => (
                 <li key={episode.id} className="border-b pb-4">
                   <h3 className="text-xl font-semibold mb-2">
                     {episode.episode_number}. {episode.name}
@@ -48,7 +54,7 @@ export default async function SeasonPage({
                   <p className="mb-2">{episode.overview}</p>
                   <Button asChild>
                     <Link
-                      href={`/tv/${params.id}/season/${params.seasonNumber}/episode/${episode.episode_number}`}
+                      href={`/tv/${id}/season/${seasonNumber}/episode/${episode.episode_number}`}
                     >
                       View Episode
                     </Link>

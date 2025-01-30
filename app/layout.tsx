@@ -24,7 +24,6 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-          suppressHydrationWarning
         >
           <Header />
           <main className="flex-grow">{children}</main>
