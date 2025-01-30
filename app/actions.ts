@@ -47,18 +47,11 @@ export async function loadMoreTVShows(
   sort?: string
 ) {
   try {
-    let response;
-    if (genreId) {
-      response = await getTVShowsByGenreAndSort(
-        genreId,
-        sort || "popularity.desc",
-        page
-      );
-    } else if (sort === "top_rated") {
-      response = await getTopRatedTVShows(page);
-    } else {
-      response = await getPopularTVShows(page);
-    }
+    const response = await getTVShowsByGenreAndSort(
+      genreId || 0,
+      sort || "popular",
+      page
+    );
 
     return (
       response?.results?.map((show: any, index: number) => ({

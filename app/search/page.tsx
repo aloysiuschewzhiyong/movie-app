@@ -57,18 +57,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         Search Results for &quot;{query}&quot;
       </h1>
 
-      <MovieGrid
-        title="Movies"
-        initialMovies={availableMovies}
-        showLoadMore={false}
-      />
-
-      <MovieGrid
-        title="TV Shows"
-        initialMovies={availableTVShows}
-        showLoadMore={false}
-        className="mt-12"
-      />
+      <MovieGrid initialMovies={availableMovies} showLoadMore={false} />
     </div>
   );
 }

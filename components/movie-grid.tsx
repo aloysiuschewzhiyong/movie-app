@@ -9,7 +9,7 @@ import { AdvancedFilters } from "./advanced-filters";
 import { Loader2 } from "lucide-react";
 
 interface MovieGridProps {
-  title: string;
+  title?: string;
   initialMovies: any[];
   loadMore?: (page: number, genreId?: number, sort?: string) => Promise<any>;
   genreId?: number;

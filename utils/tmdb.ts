@@ -326,17 +326,6 @@ export async function getTVShowsByGenreAndSort(
     include_adult: "false",
   };
 
-  // Add vote count filter based on context
-  if (sort !== "first_air_date.desc") {
-    params["vote_count.gte"] = "100";
-  } else {
-    // For latest releases, use a smarter filter:
-    // Either has some votes OR is from a major network/studio
-    params["vote_count.gte"] = "1";
-    params["with_networks"] = "213,1024,453,2739,49"; // Netflix, Amazon, Disney+, Apple TV+, HBO
-    params["or"] = "true"; // Allow either condition to be true
-  }
-
   // Always add genre if provided
   if (genreId) {
     params.with_genres = genreId.toString();
@@ -359,16 +348,16 @@ export async function getTVShowsByGenreAndSort(
       }
       break;
     case "first_air_date.desc":
+      endpoint = "/discover/tv";
       params["sort_by"] = "first_air_date.desc";
-      params["first_air_date.lte"] = new Date().toISOString().split("T")[0];
-      params["first_air_date.gte"] = new Date(
-        Date.now() - 60 * 24 * 60 * 60 * 1000
-      )
-        .toISOString()
-        .split("T")[0]; // Last 60 days
+      params["air_date.lte"] = new Date().toISOString().split("T")[0];
+      params["with_original_language"] = "en"; // English shows for better results
+
+      params["vote_count.gte"] = "5"; // At least some votes
       break;
     default:
       params["sort_by"] = sort;
+      params["vote_count.gte"] = "100";
   }
 
   const response = await fetch(

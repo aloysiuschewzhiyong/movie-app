@@ -26,7 +26,7 @@ export default async function SeriesPage({ searchParams }: SeriesPageProps) {
   const sort = resolvedParams.sort;
 
   const [initialShows, genres] = await Promise.all([
-    getTVShowsByGenreAndSort(genreId || 0, sort || "popularity.desc", 1),
+    getTVShowsByGenreAndSort(genreId || 0, sort || "popular", 1),
     getTVGenres(),
   ]);
 

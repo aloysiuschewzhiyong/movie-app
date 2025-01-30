@@ -7,8 +7,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "MovieStream",
-  description: "Your favorite movies and series streaming platform",
+  title: "Notflix",
+  description: "Arr pirate movies and tv",
 };
 
 export default function RootLayout({
