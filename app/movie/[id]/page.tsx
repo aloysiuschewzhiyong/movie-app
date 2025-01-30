@@ -8,15 +8,14 @@ import { Star } from "lucide-react";
 import { BackdropImage } from "@/components/backdrop-image";
 
 interface MoviePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function MoviePage({ params }: MoviePageProps) {
   try {
-    const resolvedParams = await Promise.resolve(params);
-    const movieId = resolvedParams.id;
+    const { id: movieId } = await params;
 
     const [movie, isAvailable] = await Promise.all([
       getMovieDetails(movieId),

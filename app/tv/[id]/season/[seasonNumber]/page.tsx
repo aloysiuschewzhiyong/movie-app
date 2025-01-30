@@ -5,16 +5,15 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 interface SeasonPageProps {
-  params: {
+  params: Promise<{
     id: string;
     seasonNumber: string;
-  };
+  }>;
 }
 
 export default async function SeasonPage({ params }: SeasonPageProps) {
   try {
-    const resolvedParams = await Promise.resolve(params);
-    const { id, seasonNumber } = resolvedParams;
+    const { id, seasonNumber } = await params;
 
     const [tvShow, season] = await Promise.all([
       getTVShowDetails(id),
