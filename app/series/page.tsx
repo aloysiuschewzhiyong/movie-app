@@ -11,17 +11,22 @@ import { SORT_OPTIONS } from "@/utils/sort-options";
 
 export const revalidate = 0;
 
-export default async function SeriesPage({
-  searchParams,
-}: {
-  searchParams: { genreId?: string; sort?: string };
-}) {
-  const params = await Promise.resolve(searchParams);
-  const genreId = params.genreId ? Number(params.genreId) : undefined;
-  const sort = params.sort ?? "popular";
+interface SeriesPageProps {
+  searchParams: Promise<{
+    genreId?: string;
+    sort?: string;
+  }>;
+}
 
-  const [initialTVShows, genres] = await Promise.all([
-    getTVShowsByGenreAndSort(genreId, sort),
+export default async function SeriesPage({ searchParams }: SeriesPageProps) {
+  const resolvedParams = await searchParams;
+  const genreId = resolvedParams.genreId
+    ? Number(resolvedParams.genreId)
+    : undefined;
+  const sort = resolvedParams.sort;
+
+  const [initialShows, genres] = await Promise.all([
+    getTVShowsByGenreAndSort(genreId || 0, sort || "popularity.desc", 1),
     getTVGenres(),
   ]);
 
@@ -38,15 +43,15 @@ export default async function SeriesPage({
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">
           {genreName
-            ? `${sortLabel} ${genreName} TV Shows`
-            : `${sortLabel} TV Shows`}
+            ? `${sortLabel} ${genreName} Series`
+            : `${sortLabel} Series`}
         </h1>
       </div>
       <GenreSelector genres={genres} selectedGenreId={genreId} mediaType="tv" />
       <MovieGrid
-        key={`tv-${genreId || "all"}-${sort}`}
+        key={`series-${genreId || "all"}-${sort}`}
         title=""
-        initialMovies={initialTVShows.results}
+        initialMovies={initialShows.results}
         loadMore={loadMoreTVShows}
         genreId={genreId}
         sort={sort}

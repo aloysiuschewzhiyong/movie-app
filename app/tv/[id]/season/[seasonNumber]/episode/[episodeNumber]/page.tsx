@@ -1,81 +1,82 @@
-import {
-  getTVShowDetails,
-  getEpisodeDetails,
-  checkVidStreamAvailability,
-} from "@/utils/tmdb";
+import { getTVShowDetails, getEpisodeDetails } from "@/utils/tmdb";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { MoviePlayer } from "@/components/movie-player";
+import { BackdropImage } from "@/components/backdrop-image";
+import { Metadata } from "next";
+
+interface EpisodePageProps {
+  params: Promise<{
+    id: string;
+    seasonNumber: string;
+    episodeNumber: string;
+  }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export async function generateMetadata({
+  params,
+}: EpisodePageProps): Promise<Metadata> {
+  try {
+    const resolvedParams = await params;
+    const { id, seasonNumber, episodeNumber } = resolvedParams;
+
+    const [show, episode] = await Promise.all([
+      getTVShowDetails(id),
+      getEpisodeDetails(id, Number(seasonNumber), Number(episodeNumber)),
+    ]);
+
+    return {
+      title: `${show.name} - S${seasonNumber}E${episodeNumber}: ${episode.name}`,
+      description: episode.overview,
+    };
+  } catch {
+    return {
+      title: "Episode Not Found",
+    };
+  }
+}
 
 export default async function EpisodePage({
   params,
-}: {
-  params: { id: string; seasonNumber: string; episodeNumber: string };
-}) {
+  searchParams,
+}: EpisodePageProps) {
   try {
-    // Convert numbers once at the start
-    const seasonNum = Number(params.seasonNumber);
-    const episodeNum = Number(params.episodeNumber);
+    const resolvedParams = await params;
+    const { id, seasonNumber, episodeNumber } = resolvedParams;
 
-    const [tvShow, episode, isAvailable] = await Promise.all([
-      getTVShowDetails(params.id), // Use params.id directly
-      getEpisodeDetails(params.id, seasonNum, episodeNum),
-      checkVidStreamAvailability(params.id, "tv"),
+    const [show, episode] = await Promise.all([
+      getTVShowDetails(id),
+      getEpisodeDetails(id, Number(seasonNumber), Number(episodeNumber)),
     ]);
 
-    if (!isAvailable) {
-      return (
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-4">Content Not Available</h1>
-          <p className="text-muted-foreground">
-            Sorry, this episode is not currently available for streaming.
-          </p>
-        </div>
-      );
-    }
-
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-4">
-          {tvShow.name} - S{seasonNum}E{episodeNum}: {episode.name}
-        </h1>
-        <div className="mb-8">
+      <>
+        <BackdropImage
+          src={`https://image.tmdb.org/t/p/original${
+            episode.still_path || show.backdrop_path
+          }`}
+        />
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <h1 className="text-3xl font-bold mb-4">
+            {show.name} - {episode.name}
+          </h1>
+          <h2 className="text-xl mb-8 text-muted-foreground">
+            Season {seasonNumber}, Episode {episodeNumber}
+          </h2>
           <MoviePlayer
-            movieId={params.id}
+            movieId={id}
+            episodeNumber={Number(episodeNumber)}
+            seasonNumber={Number(seasonNumber)}
             mediaType="tv"
-            seasonNumber={seasonNum}
-            episodeNumber={episodeNum}
           />
-        </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-1">
-            {episode.still_path && (
-              <Image
-                src={`https://image.tmdb.org/t/p/w500${episode.still_path}`}
-                alt={episode.name}
-                width={500}
-                height={281}
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
-            )}
-          </div>
-          <div className="md:col-span-2">
-            <p className="text-lg mb-4">{episode.overview}</p>
-            <div className="mb-4">
-              <strong>Air Date:</strong> {episode.air_date}
-            </div>
-            <div className="mb-4">
-              <strong>Runtime:</strong> {episode.runtime} minutes
-            </div>
-            <div className="mb-8">
-              <strong>Rating:</strong> {episode.vote_average?.toFixed(1)}/10
-            </div>
+          <div className="mt-8">
+            <p className="text-lg text-muted-foreground">{episode.overview}</p>
           </div>
         </div>
-      </div>
+      </>
     );
   } catch (error) {
-    console.error("Error fetching episode details:", error);
+    console.error("Error loading episode:", error);
     notFound();
   }
 }

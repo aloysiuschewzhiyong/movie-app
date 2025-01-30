@@ -12,17 +12,22 @@ import { SORT_OPTIONS } from "@/utils/sort-options";
 
 export const revalidate = 0;
 
-export default async function MoviesPage({
-  searchParams,
-}: {
-  searchParams: { genreId?: string; sort?: string };
-}) {
-  const params = await Promise.resolve(searchParams);
-  const genreId = params.genreId ? Number(params.genreId) : undefined;
-  const sort = params.sort ?? "popular";
+interface MoviesPageProps {
+  searchParams: Promise<{
+    genreId?: string;
+    sort?: string;
+  }>;
+}
+
+export default async function MoviesPage({ searchParams }: MoviesPageProps) {
+  const resolvedParams = await searchParams;
+  const genreId = resolvedParams.genreId
+    ? Number(resolvedParams.genreId)
+    : undefined;
+  const sort = resolvedParams.sort;
 
   const [initialMovies, genres] = await Promise.all([
-    getMoviesByGenreAndSort(genreId, sort),
+    getMoviesByGenreAndSort(genreId || 0, sort || "popularity.desc", 1),
     getMovieGenres(),
   ]);
 

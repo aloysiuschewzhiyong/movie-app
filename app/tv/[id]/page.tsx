@@ -10,28 +10,35 @@ import { SeasonAccordion } from "@/components/season-accordion";
 import { Star } from "lucide-react";
 import { getLanguageName } from "@/utils/helpers";
 import { BackdropImage } from "@/components/backdrop-image";
+import { MoviePlayer } from "@/components/movie-player";
+
+interface TVShowPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
 export default async function TVShowPage({
   params,
-}: {
-  params: { id: string };
-}) {
+  searchParams,
+}: TVShowPageProps) {
   try {
-    const { id: tvShowId } = await Promise.resolve(params);
-    const [tvShow, isAvailable] = await Promise.all([
-      getTVShowDetails(tvShowId),
-      checkVidStreamAvailability(tvShowId, "tv"),
+    const resolvedParams = await params;
+    const showId = resolvedParams.id;
+
+    const [show, isAvailable] = await Promise.all([
+      getTVShowDetails(showId),
+      checkVidStreamAvailability(showId, "tv"),
     ]);
 
-    console.log(`TV Show ${tvShowId} availability:`, isAvailable);
+    console.log(`TV Show ${showId} availability:`, isAvailable);
 
     if (!isAvailable) {
       return (
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl font-bold mb-4">Content Not Available</h1>
-          <p className="text-muted-foreground">
-            Sorry, this TV show is not currently available for streaming.
-          </p>
+          <h1 className="text-2xl font-bold mb-4">TV Show Not Available</h1>
+          <p>Sorry, this TV show is not available for streaming.</p>
         </div>
       );
     }
@@ -39,26 +46,26 @@ export default async function TVShowPage({
     return (
       <>
         <BackdropImage
-          src={`https://image.tmdb.org/t/p/original${tvShow.backdrop_path}`}
+          src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`}
         />
 
         <div className="container mx-auto px-4 -mt-56 relative z-10">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-1">
               <Image
-                src={`https://image.tmdb.org/t/p/w500${tvShow.poster_path}`}
-                alt={tvShow.name}
+                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                alt={show.name}
                 width={500}
                 height={750}
                 className="w-full h-auto rounded-lg shadow-lg"
               />
             </div>
             <div className="md:col-span-2">
-              <h1 className="text-3xl font-bold mb-6">{tvShow.name}</h1>
+              <h1 className="text-3xl font-bold mb-6">{show.name}</h1>
 
               {/* Overview */}
               <p className="text-base mb-8 text-muted-foreground">
-                {tvShow.overview}
+                {show.overview}
               </p>
 
               {/* Main metadata grid */}
@@ -68,8 +75,8 @@ export default async function TVShowPage({
                     Language
                   </h3>
                   <p className="text-base">
-                    {tvShow.original_language
-                      ? getLanguageName(tvShow.original_language)
+                    {show.original_language
+                      ? getLanguageName(show.original_language)
                       : "N/A"}
                   </p>
                 </div>
@@ -77,7 +84,7 @@ export default async function TVShowPage({
                   <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                     First Air Date
                   </h3>
-                  <p className="text-base">{tvShow.first_air_date}</p>
+                  <p className="text-base">{show.first_air_date}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-muted-foreground mb-2">
@@ -85,9 +92,9 @@ export default async function TVShowPage({
                   </h3>
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 fill-current text-primary" />
-                    <span>{tvShow.vote_average.toFixed(1)}/10</span>
+                    <span>{show.vote_average.toFixed(1)}/10</span>
                     <span className="text-sm text-muted-foreground">
-                      ({tvShow.vote_count?.toLocaleString()} votes)
+                      ({show.vote_count?.toLocaleString()} votes)
                     </span>
                   </div>
                 </div>
@@ -95,14 +102,14 @@ export default async function TVShowPage({
                   <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                     Content Rating
                   </h3>
-                  <p className="text-base">{tvShow.content_rating}</p>
+                  <p className="text-base">{show.content_rating}</p>
                 </div>
                 <div className="col-span-2">
                   <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                     Genres
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {tvShow.genres.map((g: any) => (
+                    {show.genres.map((g: any) => (
                       <Badge key={g.id} variant="secondary">
                         {g.name}
                       </Badge>
@@ -117,7 +124,7 @@ export default async function TVShowPage({
                   Cast
                 </h3>
                 <p className="text-base">
-                  {tvShow.credits.cast
+                  {show.credits.cast
                     .slice(0, 5)
                     .map((actor: any) => actor.name)
                     .join(", ")}
@@ -127,7 +134,7 @@ export default async function TVShowPage({
               {/* Seasons */}
               <div className="mb-8">
                 <h2 className="text-2xl font-bold mb-4">Seasons</h2>
-                <SeasonAccordion seasons={tvShow.seasons} tvShowId={tvShowId} />
+                <SeasonAccordion seasons={show.seasons} tvShowId={showId} />
               </div>
             </div>
           </div>
@@ -135,7 +142,7 @@ export default async function TVShowPage({
       </>
     );
   } catch (error) {
-    console.error("Error fetching TV show details:", error);
+    console.error("Error loading TV show:", error);
     notFound();
   }
 }
