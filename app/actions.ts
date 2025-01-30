@@ -20,7 +20,7 @@ export async function loadMoreMovies(
     if (genreId) {
       response = await getMoviesByGenreAndSort(
         genreId,
-        sort || "popular",
+        sort || "popularity.desc",
         page
       );
     } else if (sort === "top_rated") {
@@ -51,7 +51,7 @@ export async function loadMoreTVShows(
     if (genreId) {
       response = await getTVShowsByGenreAndSort(
         genreId,
-        sort || "popular",
+        sort || "popularity.desc",
         page
       );
     } else if (sort === "top_rated") {

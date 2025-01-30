@@ -12,15 +12,12 @@ import { SORT_OPTIONS } from "@/utils/sort-options";
 
 export const revalidate = 0;
 
-interface MoviesPageProps {
-  searchParams: Promise<{
-    genreId?: string;
-    sort?: string;
-  }>;
-}
-
-export default async function MoviesPage({ searchParams }: MoviesPageProps) {
-  const params = await searchParams;
+export default async function MoviesPage({
+  searchParams,
+}: {
+  searchParams: { genreId?: string; sort?: string };
+}) {
+  const params = await Promise.resolve(searchParams);
   const genreId = params.genreId ? Number(params.genreId) : undefined;
   const sort = params.sort ?? "popular";
 

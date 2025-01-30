@@ -11,15 +11,12 @@ import { SORT_OPTIONS } from "@/utils/sort-options";
 
 export const revalidate = 0;
 
-interface SeriesPageProps {
-  searchParams: Promise<{
-    genreId?: string;
-    sort?: string;
-  }>;
-}
-
-export default async function SeriesPage({ searchParams }: SeriesPageProps) {
-  const params = await searchParams;
+export default async function SeriesPage({
+  searchParams,
+}: {
+  searchParams: { genreId?: string; sort?: string };
+}) {
+  const params = await Promise.resolve(searchParams);
   const genreId = params.genreId ? Number(params.genreId) : undefined;
   const sort = params.sort ?? "popular";
 

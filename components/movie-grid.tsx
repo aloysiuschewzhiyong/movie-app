@@ -15,6 +15,7 @@ interface MovieGridProps {
   genreId?: number;
   className?: string;
   showLoadMore?: boolean;
+  sort?: string;
 }
 
 export function MovieGrid({
@@ -24,6 +25,7 @@ export function MovieGrid({
   genreId,
   className = "",
   showLoadMore = true,
+  sort,
 }: MovieGridProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
