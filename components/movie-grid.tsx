@@ -38,6 +38,10 @@ export function MovieGrid({
   const [initialLoading, setInitialLoading] = useState(!initialMovies.length);
   const [hasMore, setHasMore] = useState(true);
   const loader = useRef(null);
+  const [ratingRange, setRatingRange] = useState<[number, number]>([0, 10]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [selectedContentRating, setSelectedContentRating] =
+    useState<string>("all");
 
   // For home page (when showLoadMore is false), just show initialMovies
   if (!showLoadMore) {
@@ -71,18 +75,15 @@ export function MovieGrid({
   };
 
   const handleRatingChange = (range: [number, number]) => {
-    // Implement rating filter
-    console.log("Rating range:", range);
+    setRatingRange(range);
   };
 
   const handleLanguageChange = (language: string) => {
-    // Implement language filter
-    console.log("Language:", language);
+    setSelectedLanguage(language);
   };
 
   const handleContentRatingChange = (rating: string) => {
-    // Implement content rating filter
-    console.log("Content rating:", rating);
+    setSelectedContentRating(rating);
   };
 
   // For pages with infinite scroll
@@ -127,6 +128,20 @@ export function MovieGrid({
     return () => observer.disconnect();
   }, [handleObserver]);
 
+  const filteredMovies = movies.filter((movie) => {
+    const ratingMatch =
+      movie.vote_average >= ratingRange[0] &&
+      movie.vote_average <= ratingRange[1];
+    const languageMatch =
+      selectedLanguage === "all" ||
+      movie.original_language === selectedLanguage;
+    const contentRatingMatch =
+      selectedContentRating === "all" ||
+      movie.content_rating === selectedContentRating;
+
+    return ratingMatch && languageMatch && contentRatingMatch;
+  });
+
   if (initialLoading) {
     return (
       <section>
@@ -157,7 +172,7 @@ export function MovieGrid({
       <div
         className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3 lg:gap-4 ${className}`}
       >
-        {movies.map((movie, index) => (
+        {filteredMovies.map((movie, index) => (
           <motion.div
             key={`${movie.id}-${index}`}
             initial={{ opacity: 0, y: 20 }}
