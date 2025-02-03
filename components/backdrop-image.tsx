@@ -26,6 +26,7 @@ export function BackdropImage({ src }: BackdropImageProps) {
         style={{ transform: `translateY(${scrollY * 0.3}px)` }}
       >
         <Image
+          unoptimized
           src={src}
           alt=""
           fill
