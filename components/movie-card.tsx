@@ -94,6 +94,7 @@ export function MovieCard({ movie }: MovieCardProps) {
               </div>
 
               <Image
+                unoptimized
                 src={posterPath || "/placeholder.svg"}
                 alt={title}
                 fill
